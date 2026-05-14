@@ -130,6 +130,12 @@ Well, since now it seems like I was writing a tool to monitor all of the stuff o
 
 Anyway, that's the way too long story, below is the stuff an LLM told me to include about the code and what it does. I mean, the code was above the whole time, it's not like this was some recipe blog where I'm keeping an audience captive so you can learn to scramble the perfect egg. You read this because you decided to.
 
+## Temporary NVMe temperature display
+
+`gnome-status-line` currently includes the highest NVMe temperature sensor as `NVMe ##°`.
+
+Reason: Samsung 990 EVO currently has one warmer internal sensor while running without a heatsink. MC1 Pro heatsink is ordered, oughta be here in about a week. After installation and before/after validation, this field will be removed from the top bar.
+
 It is meant to answer the usual “what the hell is my computer doing?” questions at a glance:
 
 - CPU temperature

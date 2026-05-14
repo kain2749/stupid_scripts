@@ -80,5 +80,20 @@ phone="$(
 
 [ -z "$phone" ] && phone="?"
 
-printf "CPU %s° | RAM %sG | GPU %s° | VRAM %sG | SSD %s | 🎮%s%% | 📱%s%%\n" \
-  "${cpu:-?}" "$ram_avail" "${gpu:-?}" "$vram_avail" "$ssd_avail" "$controller" "$phone"
+nvme_high="$(
+  sensors 2>/dev/null | awk '
+    /^(Composite|Sensor 1|Sensor 2):/ {
+      val=$2
+      if ($1 == "Sensor") val=$3
+      gsub(/[+°C]/, "", val)
+      if (val+0 > max) max=val+0
+    }
+    END {
+      if (max > 0) printf "%.0f", max
+      else printf "?"
+    }
+  '
+)"
+
+printf "CPU %s° | RAM %sG | GPU %s° | VRAM %sG | SSD %s | NVME %s° | 🎮%s%% | 📱%s%%\n" \
+  "${cpu:-?}" "$ram_avail" "${gpu:-?}" "$vram_avail" "$ssd_avail" "$nvme_high" "$controller" "$phone"
