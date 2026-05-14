@@ -2,9 +2,7 @@
 
 sensors_out="$(sensors 2>/dev/null)"
 
-#cpu temp, getting package cause... i dunno, there's a lot of cores and that
-#can be intimidating. what, do i take their average or something? does
-#package already do that? whatever
+#getting CPU prepped off of package id... the other options are cores, so seems fair enough
 cpu="$(
   awk '/Package id 0:/ {
     gsub(/[+°C]/, "", $4)
@@ -13,7 +11,7 @@ cpu="$(
   }' <<< "$sensors_out"
 )"
 
-#gpu temp, getting junction for most paranoid temp
+#this one, deliberately took the junction temp, that one is supposed to be the highest.
 gpu="$(
   awk '/^junction:/ {
     gsub(/[+°C]/, "", $2)
@@ -22,14 +20,23 @@ gpu="$(
   }' <<< "$sensors_out"
 )"
 
+# Fallback if junction is unavailable.
+if [ -z "$gpu" ]; then
+  gpu="$(
+    awk '/^edge:/ {
+      gsub(/[+°C]/, "", $2)
+      printf "%.0f", $2
+      exit
+    }' <<< "$sensors_out"
+  )"
+fi
+
 ram_avail="$(
   free -b | awk '/^Mem:/ {
     printf "%.0f", $7 / 1024 / 1024 / 1024
   }'
 )"
 
-#this is useful in case if ollama hangs or something and i randomly
-#lose 5GB of VRAM. i kinda like to know when that is a thing
 gpu_dev=""
 for d in /sys/class/drm/card*/device; do
   [ -f "$d/vendor" ] || continue
@@ -42,11 +49,11 @@ for d in /sys/class/drm/card*/device; do
   fi
 done
 
-#oh, maybe i should've put that comment here. let's pretend like i did
 vram_avail="?"
 if [ -n "$gpu_dev" ]; then
   used="$(cat "$gpu_dev/mem_info_vram_used")"
   total="$(cat "$gpu_dev/mem_info_vram_total")"
+
   vram_avail="$(
     awk -v u="$used" -v t="$total" 'BEGIN {
       printf "%.1f", (t - u) / 1024 / 1024 / 1024
@@ -54,34 +61,68 @@ if [ -n "$gpu_dev" ]; then
   )"
 fi
 
-#so, i don't actually care about my storage space free, but it seemed
-#like something i should include here
-ssd_avail="$(df -h / | awk 'NR==2 {print $4}')"
+ssd_avail="$(df -h --output=avail / | awk 'NR==2 {print $1}')"
 
-#my ps5 controller battery
-controller="$(
-  upower -i "$(upower -e | grep -Ei 'controller|dualsense|sony' | head -n1)" 2>/dev/null \
-    | awk -F': *' '/percentage:/ {gsub("%","",$2); print $2; exit}'
-)"
+controller_device="$(upower -e | grep -Ei 'controller|dualsense|sony' | head -n1)"
+
+controller="?"
+if [ -n "$controller_device" ]; then
+  controller="$(
+    upower -i "$controller_device" 2>/dev/null |
+      awk -F': *' '/percentage:/ {
+        gsub("%", "", $2)
+        print $2
+        exit
+      }'
+  )"
+fi
 
 [ -z "$controller" ] && controller="?"
 
-DEST="org.gnome.Shell.Extensions.GSConnect"
-DEV="/org/gnome/Shell/Extensions/GSConnect/Device/23d71c094298493ca8651dfdeed132c3"
-
-phone="$(
+gsconnect_device_paths() {
   gdbus call --session \
-    --dest "$DEST" \
-    --object-path "$DEV" \
-    --method org.gtk.Actions.Describe battery 2>/dev/null \
-  | grep -oE "'battery[^']*', [0-9]+" \
-  | grep -oE '[0-9]+$'
-)"
+    --dest org.gnome.Shell.Extensions.GSConnect \
+    --object-path /org/gnome/Shell/Extensions/GSConnect \
+    --method org.freedesktop.DBus.ObjectManager.GetManagedObjects 2>/dev/null |
+    grep -oE "/org/gnome/Shell/Extensions/GSConnect/Device/[A-Za-z0-9_-]+" |
+    sort -u
+}
 
+phone_from_gsconnect() {
+  local dev_path
+  local battery_action
+  local percent
+
+  while read -r dev_path; do
+    [ -n "$dev_path" ] || continue
+
+    battery_action="$(
+      gdbus call --session \
+        --dest org.gnome.Shell.Extensions.GSConnect \
+        --object-path "$dev_path" \
+        --method org.gtk.Actions.Describe battery 2>/dev/null
+    )"
+
+    percent="$(
+      grep -oE "'battery[^']*', [0-9]+" <<< "$battery_action" |
+        grep -oE '[0-9]+$' |
+        head -n1
+    )"
+
+    if [ -n "$percent" ]; then
+      printf "%s" "$percent"
+      return 0
+    fi
+  done < <(gsconnect_device_paths)
+
+  return 1
+}
+
+phone="$(phone_from_gsconnect)"
 [ -z "$phone" ] && phone="?"
 
 nvme_high="$(
-  sensors 2>/dev/null | awk '
+  awk '
     /^(Composite|Sensor 1|Sensor 2):/ {
       val=$2
       if ($1 == "Sensor") val=$3
@@ -92,8 +133,8 @@ nvme_high="$(
       if (max > 0) printf "%.0f", max
       else printf "?"
     }
-  '
+  ' <<< "$sensors_out"
 )"
 
-printf "CPU %s° | RAM %sG | GPU %s° | VRAM %sG | SSD %s | NVME %s° | 🎮%s%% | 📱%s%%\n" \
-  "${cpu:-?}" "$ram_avail" "${gpu:-?}" "$vram_avail" "$ssd_avail" "$nvme_high" "$controller" "$phone"
+printf "CPU %s° | RAM %sG | GPU %s° | VRAM %sG | SSD %s | NVMe %s° | 🎮%s%% | 📱%s%%\n" \
+  "${cpu:-?}" "${ram_avail:-?}" "${gpu:-?}" "${vram_avail:-?}" "${ssd_avail:-?}" "${nvme_high:-?}" "${controller:-?}" "${phone:-?}"
