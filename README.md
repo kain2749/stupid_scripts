@@ -2,6 +2,8 @@
 
 Personal Linux helper scripts, shell config, and desktop glue.
 
+This is not a framework; it is an example of slowly turning personal Linux annoyances into small scripts you can understand, modify, and recover later.
+
 This repo exists so my useful little Linux scripts are not scattered across `~/bin`, `~/.local/bin`, random GNOME settings, and whatever other nonsense I did at 2 AM.
 
 It is basically a tiny recovery kit for my desktop workflow. Well, portions of my desktop workflow. Portions that are unique to my Pop!_OS install. And that's important sometimes.
