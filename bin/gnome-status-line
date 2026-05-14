@@ -2,6 +2,9 @@
 
 sensors_out="$(sensors 2>/dev/null)"
 
+#cpu temp, getting package cause... i dunno, there's a lot of cores and that
+#can be intimidating. what, do i take their average or something? does
+#package already do that? whatever
 cpu="$(
   awk '/Package id 0:/ {
     gsub(/[+°C]/, "", $4)
@@ -10,8 +13,9 @@ cpu="$(
   }' <<< "$sensors_out"
 )"
 
+#gpu temp, getting junction for most paranoid temp
 gpu="$(
-  awk '/^edge:/ {
+  awk '/^junction:/ {
     gsub(/[+°C]/, "", $2)
     printf "%.0f", $2
     exit
@@ -24,6 +28,8 @@ ram_avail="$(
   }'
 )"
 
+#this is useful in case if ollama hangs or something and i randomly
+#lose 5GB of VRAM. i kinda like to know when that is a thing
 gpu_dev=""
 for d in /sys/class/drm/card*/device; do
   [ -f "$d/vendor" ] || continue
@@ -36,6 +42,7 @@ for d in /sys/class/drm/card*/device; do
   fi
 done
 
+#oh, maybe i should've put that comment here. let's pretend like i did
 vram_avail="?"
 if [ -n "$gpu_dev" ]; then
   used="$(cat "$gpu_dev/mem_info_vram_used")"
@@ -46,6 +53,10 @@ if [ -n "$gpu_dev" ]; then
     }'
   )"
 fi
+
+#so, i don't actually care about my storage space free, but it seemed
+#like something i should include here
+ssd_avail="$(df -h / | awk 'NR==2 {print $4}')"
 
 DEST="org.gnome.Shell.Extensions.GSConnect"
 DEV="/org/gnome/Shell/Extensions/GSConnect/Device/23d71c094298493ca8651dfdeed132c3"
@@ -61,5 +72,5 @@ phone="$(
 
 [ -z "$phone" ] && phone="?"
 
-printf "CPU %s° | GPU %s° | VRAM %sG | RAM %sG | 📱%s%%\n" \
-  "${cpu:-?}" "${gpu:-?}" "$vram_avail" "$ram_avail" "$phone"
+printf "CPU %s° | GPU %s° | VRAM %sG | RAM %sG | SSD %s | 📱%s%%\n" \
+  "${cpu:-?}" "${gpu:-?}" "$vram_avail" "$ram_avail" "$ssd_avail" "$phone"
