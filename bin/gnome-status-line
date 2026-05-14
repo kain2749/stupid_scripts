@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+
+sensors_out="$(sensors 2>/dev/null)"
+
+cpu="$(
+  awk '/Package id 0:/ {
+    gsub(/[+°C]/, "", $4)
+    printf "%.0f", $4
+    exit
+  }' <<< "$sensors_out"
+)"
+
+gpu="$(
+  awk '/^edge:/ {
+    gsub(/[+°C]/, "", $2)
+    printf "%.0f", $2
+    exit
+  }' <<< "$sensors_out"
+)"
+
+ram_avail="$(
+  free -b | awk '/^Mem:/ {
+    printf "%.0f", $7 / 1024 / 1024 / 1024
+  }'
+)"
+
+gpu_dev=""
+for d in /sys/class/drm/card*/device; do
+  [ -f "$d/vendor" ] || continue
+  [ -f "$d/mem_info_vram_used" ] || continue
+  [ -f "$d/mem_info_vram_total" ] || continue
+
+  if [ "$(cat "$d/vendor")" = "0x1002" ]; then
+    gpu_dev="$d"
+    break
+  fi
+done
+
+vram_avail="?"
+if [ -n "$gpu_dev" ]; then
+  used="$(cat "$gpu_dev/mem_info_vram_used")"
+  total="$(cat "$gpu_dev/mem_info_vram_total")"
+  vram_avail="$(
+    awk -v u="$used" -v t="$total" 'BEGIN {
+      printf "%.1f", (t - u) / 1024 / 1024 / 1024
+    }'
+  )"
+fi
+
+DEST="org.gnome.Shell.Extensions.GSConnect"
+DEV="/org/gnome/Shell/Extensions/GSConnect/Device/23d71c094298493ca8651dfdeed132c3"
+
+phone="$(
+  gdbus call --session \
+    --dest "$DEST" \
+    --object-path "$DEV" \
+    --method org.gtk.Actions.Describe battery 2>/dev/null \
+  | grep -oE "'battery[^']*', [0-9]+" \
+  | grep -oE '[0-9]+$'
+)"
+
+[ -z "$phone" ] && phone="?"
+
+printf "CPU %s° | GPU %s° | VRAM %sG | RAM %sG | 📱%s%%\n" \
+  "${cpu:-?}" "${gpu:-?}" "$vram_avail" "$ram_avail" "$phone"
