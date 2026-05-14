@@ -104,7 +104,7 @@ Current idea:
 CPU 52° | GPU 39° | VRAM 6.5G | RAM 20G | SSD 1.2T | 🎮95% | 📱95%
 ```
 
-![the reason the controller is not in this image will be explained later]](docs/images/normal_not_eaten_by_angry_lammas.png)
+![the reason the controller is not in this image will be explained later](docs/images/normal_not_eaten_by_angry_lammas.png)
 
 So, I made the switch from Windows 10 to Linux a couple of years ago. When I did, I learned about this really neat and colorful CLI tool called [bpytop](https://github.com/aristocratos/bpytop). I tested it on my computer and discovered that my processor was trying to catch on fire.
 
