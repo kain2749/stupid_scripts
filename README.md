@@ -13,6 +13,7 @@ Runtime commands should live in:
 ```text
 ~/.local/bin
 ```
+QUIC restore
 ```sh
 mkdir -p ~/repos
 cd ~/repos
@@ -21,3 +22,4 @@ cd stupid_scripts
 ./install.sh
 source ~/.bashrc
 ```
+ha, see what i did there with quic
