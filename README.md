@@ -1,2 +1,14 @@
 # stupid_scripts
-my scripts/backup for linux BS
+
+Personal Linux helper scripts, shell config, and desktop glue.
+
+This repo exists so my useful little Linux scripts are not scattered across `~/bin`, `~/.local/bin`, random GNOME settings, and whatever other nonsense I did at 2 AM.
+
+## Purpose
+
+This is the source of truth for small local scripts I actually use.
+
+Runtime commands should live in:
+
+```text
+~/.local/bin
