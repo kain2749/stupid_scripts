@@ -58,6 +58,14 @@ fi
 #like something i should include here
 ssd_avail="$(df -h / | awk 'NR==2 {print $4}')"
 
+#my ps5 controller battery
+controller="$(
+  upower -i "$(upower -e | grep -Ei 'controller|dualsense|sony' | head -n1)" 2>/dev/null \
+    | awk -F': *' '/percentage:/ {gsub("%","",$2); print $2; exit}'
+)"
+
+[ -z "$controller" ] && controller="?"
+
 DEST="org.gnome.Shell.Extensions.GSConnect"
 DEV="/org/gnome/Shell/Extensions/GSConnect/Device/23d71c094298493ca8651dfdeed132c3"
 
@@ -72,5 +80,5 @@ phone="$(
 
 [ -z "$phone" ] && phone="?"
 
-printf "CPU %s° | GPU %s° | VRAM %sG | RAM %sG | SSD %s | 📱%s%%\n" \
-  "${cpu:-?}" "${gpu:-?}" "$vram_avail" "$ram_avail" "$ssd_avail" "$phone"
+printf "CPU %s° | GPU %s° | VRAM %sG | RAM %sG | SSD %s | 🎮%s%% | 📱%s%%\n" \
+  "${cpu:-?}" "${gpu:-?}" "$vram_avail" "$ram_avail" "$ssd_avail" "$controller" "$phone"
