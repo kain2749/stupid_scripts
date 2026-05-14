@@ -134,7 +134,7 @@ Anyway, that's the way too long story, below is the stuff an LLM told me to incl
 
 `gnome-status-line` currently includes the highest NVMe temperature sensor as `NVMe ##°`.
 
-Reason: Samsung 990 EVO currently has one warmer internal sensor while running without a heatsink. MC1 Pro heatsink is ordered, oughta be here in about a week. After installation and before/after validation, this field will be removed from the top bar.
+Reason: Samsung 990 EVO has one warmer internal sensor while running without a heatsink. MC1 Pro heatsink is ordered, oughta be here in about a week. After install and before/after validation, this field will be removed from the top bar.
 
 It is meant to answer the usual “what the hell is my computer doing?” questions at a glance:
 
