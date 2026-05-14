@@ -12,3 +12,10 @@ Runtime commands should live in:
 
 ```text
 ~/.local/bin
+
+mkdir -p ~/repos
+cd ~/repos
+git clone git@github.com:kain2749/stupid_scripts.git
+cd stupid_scripts
+./install.sh
+source ~/.bashrc
