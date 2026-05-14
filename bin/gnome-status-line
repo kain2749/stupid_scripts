@@ -78,17 +78,17 @@ list_gsconnect_device_paths() {
 }
 
 get_gsconnect_phone_battery() {
-  local dev_path
+  local device_path
   local battery_action
   local percent
 
-  while read -r dev_path; do
-    [ -n "$dev_path" ] || continue
+  while read -r device_path; do
+    [ -n "$device_path" ] || continue
 
     battery_action="$(
       gdbus call --session \
         --dest org.gnome.Shell.Extensions.GSConnect \
-        --object-path "$dev_path" \
+        --object-path "$device_path" \
         --method org.gtk.Actions.Describe battery 2>/dev/null
     )"
 
