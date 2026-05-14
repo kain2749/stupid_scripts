@@ -20,17 +20,6 @@ gpu="$(
   }' <<< "$sensors_out"
 )"
 
-# Fallback if junction is unavailable.
-if [ -z "$gpu" ]; then
-  gpu="$(
-    awk '/^edge:/ {
-      gsub(/[+°C]/, "", $2)
-      printf "%.0f", $2
-      exit
-    }' <<< "$sensors_out"
-  )"
-fi
-
 ram_avail="$(
   free -b | awk '/^Mem:/ {
     printf "%.0f", $7 / 1024 / 1024 / 1024
@@ -79,7 +68,7 @@ fi
 
 [ -z "$controller" ] && controller="?"
 
-gsconnect_device_paths() {
+list_gsconnect_device_paths() {
   gdbus call --session \
     --dest org.gnome.Shell.Extensions.GSConnect \
     --object-path /org/gnome/Shell/Extensions/GSConnect \
@@ -88,7 +77,7 @@ gsconnect_device_paths() {
     sort -u
 }
 
-phone_from_gsconnect() {
+get_gsconnect_phone_battery() {
   local dev_path
   local battery_action
   local percent
@@ -113,12 +102,12 @@ phone_from_gsconnect() {
       printf "%s" "$percent"
       return 0
     fi
-  done < <(gsconnect_device_paths)
+  done < <(list_gsconnect_device_paths)
 
   return 1
 }
 
-phone="$(phone_from_gsconnect)"
+phone="$(get_gsconnect_phone_battery)"
 [ -z "$phone" ] && phone="?"
 
 nvme_high="$(
