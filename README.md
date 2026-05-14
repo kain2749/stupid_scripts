@@ -70,11 +70,11 @@ Toggles my desktop audio output. So, I have a Fire TV as my secondary monitor th
 wpctl status
 ```
 
-However, I noticed a problem with this. If your computer restarts, it can randomly decide to assign sink IDs to any audio devices it wants. That was inconvenient for my use case. So I used to a different strategy in this version, where I looked at the very specific name the device was assigned by PipeWire. As I write this, 52 is the sink ID for my TV, 51 is the sink ID if I wanted all of my audio to come out of my PS5 controller, and 46 would be for my headphones.
+However, I noticed a problem with this. If your computer restarts, it can randomly decide to assign sink IDs to any audio devices it wants. That was inconvenient for my use case. So I used a different strategy in this version, where I looked at the very specific name the device was assigned by PipeWire. As I write this, 52 is the sink ID for my TV, 51 is the sink ID if I wanted all of my audio to come out of my PS5 controller, and 46 would be for my headphones.
 
 ![I haven't tried using my PS5 controller as my primary audio source yet. Sorry.](docs/images/example_ps5_speakers.png)
 
-This is likely to change when I restart my computer, which is as infrequently as possible. To handle this, I gave the HEADPHONES and TV variables names and made them all upper case so they're constants and not variables, because thems the rules. Then, I set a hotkey to ctrl+*, specifically the asterisk on the numpad, because I also use the + and - keys there to change volume. Like, with others keys pressed, not just by themselves like some kind of savage.
+This is likely to change when I restart my computer, which is as infrequently as possible. To handle this, I gave the HEADPHONES and TV variables names and I made the names uppercase because shell convention says “don’t mutate this unless you enjoy pain.” Then, I set a hotkey to ctrl+*, specifically the asterisk on the numpad, because I also use the + and - keys there to change volume. Like, with others keys pressed, not just by themselves like some kind of savage.
 
 Current use case:
 
@@ -102,7 +102,7 @@ Current idea:
 CPU 52° | GPU 39° | VRAM 6.5G | RAM 20G | SSD 1.2T | 🎮95% | 📱95%
 ```
 
-![picture of what my top status bar looks like on my GNOME](docs/images/normal_not_eaten_by_angry_lammas.png)
+![the reason the controller is not in this image will be explained later]](docs/images/normal_not_eaten_by_angry_lammas.png)
 
 So, I made the switch from Windows 10 to Linux a couple of years ago. When I did, I learned about this really neat and colorful CLI tool called [bpytop](https://github.com/aristocratos/bpytop). I tested it on my computer and discovered that my processor was trying to catch on fire.
 
@@ -155,7 +155,7 @@ There was an emergency addition to this script after I wrote all of this, and I'
 
 ### `shell/bash_aliases`
 
-The main Bash alias I use that matters to me is the github crap and batt.
+The Bash aliases that matter most are the Git shortcuts and `batt`, because apparently controller battery telemetry is infrastructure now.
 
 ![I could look up what that command does, but I dunno. It gets me the percent charge left in my battery.](docs/images/batt_alias.png)
 
