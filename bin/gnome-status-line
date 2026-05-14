@@ -80,5 +80,5 @@ phone="$(
 
 [ -z "$phone" ] && phone="?"
 
-printf "CPU %s° | GPU %s° | VRAM %sG | RAM %sG | SSD %s | 🎮%s%% | 📱%s%%\n" \
-  "${cpu:-?}" "${gpu:-?}" "$vram_avail" "$ram_avail" "$ssd_avail" "$controller" "$phone"
+printf "CPU %s° | RAM %sG | GPU %s° | VRAM %sG | SSD %s | 🎮%s%% | 📱%s%%\n" \
+  "${cpu:-?}" "$ram_avail" "${gpu:-?}" "$vram_avail" "$ssd_avail" "$controller" "$phone"
