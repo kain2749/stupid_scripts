@@ -116,9 +116,7 @@ So, 4 years after buying the computer, I replaced the CPU cooler with one an acq
 
 ![rather large cpu cooler. also new](docs/images/new_cpu_cooler.jpg)
 
-
-
-![less angry picture of bpytop, it's pretty chill these days](docs/images/bpytop_after.jpg)
+![less angry picture of bpytop, it's pretty chill these days](docs/images/bpytop_after.png)
 
 I notice my GPU doesn't use fans very often. It stays pretty chill. I get worried about it, so I included it in my status line.
 
