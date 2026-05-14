@@ -85,7 +85,7 @@ Current use case:
 - lives at a stable runtime path:
 
 ```text
-/home/kain/.local/bin/toggle-audio
+~/.local/bin/toggle-audio
 ```
 
 The actual source file is:
@@ -139,7 +139,7 @@ It is meant to answer the usual “what the hell is my computer doing?” questi
 The runtime path is:
 
 ```text
-/home/kain/.local/bin/gnome-status-line
+~/.local/bin/gnome-status-line
 ```
 
 The actual source file is:
