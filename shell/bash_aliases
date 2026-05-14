@@ -1,0 +1,9 @@
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit -m'
+alias gp='git push'
+alias gl='git log --oneline --decorate --graph -20'
+alias gd='git diff'
+alias gds='git diff --staged'
+# Controller battery check
+alias batt='upower -i "$(upower -e | grep -Ei 'controller' | head -n1)"'
