@@ -24,7 +24,7 @@ But the real editable files live in this repo:
 
 Most/all things in ~/.local/bin should be symlinks back into this repo.
 
-##QUIC restore
+## QUIC restore
 
 Fresh Linux install, SSD died, or I did something brave and stupid:
 
@@ -115,6 +115,9 @@ I didn't take pictures of the entire process, but I was able to locate a picture
 So, 4 years after buying the computer, I replaced the CPU cooler with one an acquaintance recommended to me. I didn't realize that I was ordering an engine that mounted on top of a tiny chip, but here we are. It is called the [Dark Rock Pro 5](https://www.bequiet.com/en/cpucooler/4466) if you're interested. I don't know how portable CPU coolers are from machine to machine, but I've been told this one is, so okay. Below is what it looks like in my computer, and a bpytop image of the difference it made:
 
 ![rather large cpu cooler. also new](docs/images/new_cpu_cooler.jpg)
+
+
+
 ![less angry picture of bpytop, it's pretty chill these days](docs/images/bpytop_after.jpg)
 
 I notice my GPU doesn't use fans very often. It stays pretty chill. I get worried about it, so I included it in my status line.
