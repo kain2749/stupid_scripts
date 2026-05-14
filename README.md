@@ -155,7 +155,7 @@ There was an emergency addition to this script after I wrote all of this, and I'
 
 ### `shell/bash_aliases`
 
-The main Bash alias I use that matters whatsoever is the github crap and batt.
+The main Bash alias I use that matters to me is the github crap and batt.
 
 ![I could look up what that command does, but I dunno. It gets me the percent charge left in my battery.](docs/images/batt_alias.png)
 
