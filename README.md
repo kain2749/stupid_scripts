@@ -98,15 +98,17 @@ The actual source file is:
 
 Generates a compact desktop status line for GNOME / Executor.
 
+The status line is ordered as: CPU, RAM, GPU, VRAM, SSD, controller, phone.
+
 Current idea:
 
 ```text
-CPU 52° | GPU 39° | VRAM 6.5G | RAM 20G | SSD 1.2T | 🎮95% | 📱95%
+CPU 52° | RAM 20G | GPU 39° | VRAM 6.5G | SSD 1.2T | 🎮95% | 📱95%
 ```
 
 ![the reason the controller is not in this image will be explained later](docs/images/normal_not_eaten_by_angry_lammas.png)
 
-So, I made the switch from Windows 10 to Linux a couple of years ago. When I did, I learned about this really neat and colorful CLI tool called [bpytop](https://github.com/aristocratos/bpytop). I tested it on my computer and discovered that my processor was trying to catch on fire.
+So, I made the switch from Windows 10 to Linux a couple of years ago. When I did, I learned about this really neat and colorful CLI tool called [bpytop](https://github.com/aristocratos/bpytop). These days, use [btop](https://github.com/aristocratos/btop) instead; it is the newer C++ version of the same family and is what I would install now. Getting to the larger overall point, when I used bpytop, I discovered that my processor was trying to catch on fire.
 
 ![this should be a picture of my computer on fire](docs/images/bpytop_before.png)
 
@@ -124,14 +126,16 @@ I notice my GPU doesn't use fans very often. It stays pretty chill. I get worrie
 
 For questions regarding why VRAM is included, I direct you to my chess related tool: [https://github.com/kain2749/toaster_chess_analysis](https://github.com/kain2749/toaster_chess_analysis) The TLDR is that local LLMs use up a lot of VRAM, and that confused me for about an hour, and since I occasionally still use local LLMs, I decided that should be included.
 
-Well, since now it seems like I was writing a tool to monitor all of the stuff on my computer, I went ahead and added RAM and amount of storage space remaining. Then I added how much charge is on my phone so I could use the emoji, and I thought that would be kind of neat. Anyway, that's the way too long story, below is the stuff an LLM told me to include about the code and what it does. I mean, the code was above the whole time, it's not like this was some recipe blog where I'm keeping an audience captive so you can learn to scramble the perfect egg. You read this because you decided to.
+Well, since now it seems like I was writing a tool to monitor all of the stuff on my computer, I went ahead and added available RAM and amount of storage space remaining. Then I added how much charge is on my phone so I could use the emoji, ... there's also a video game controller emoji! But eventually, you do run out of space for something that's just supposed to give you a glance fast quick system update. 
+
+Anyway, that's the way too long story, below is the stuff an LLM told me to include about the code and what it does. I mean, the code was above the whole time, it's not like this was some recipe blog where I'm keeping an audience captive so you can learn to scramble the perfect egg. You read this because you decided to.
 
 It is meant to answer the usual “what the hell is my computer doing?” questions at a glance:
 
 - CPU temperature
+- available RAM
 - GPU temperature
 - available VRAM
-- available RAM
 - free SSD space
 - PS5 / DualSense controller battery from UPower
 - phone battery from GSConnect
@@ -147,8 +151,6 @@ The actual source file is:
 ```text
 ~/repos/stupid_scripts/bin/gnome-status-line
 ```
-
-There was an emergency addition to this script after I wrote all of this, and I'm too lazy to change all of this at this moment, so perhaps later. My status bar monstrosity now includes my PS5 controller battery level.
 
 ![now with my controller](docs/images/i_decided_to_add_my_controller.png)
 
