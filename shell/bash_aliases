@@ -11,3 +11,8 @@ alias codium='flatpak run com.vscodium.codium'
 export SYSTEMD_EDITOR=vi
 export EDITOR=vi
 export VISUAL=vi
+#imhex flatpak bs
+imhex() {
+    flatpak run net.werwolv.ImHex "$@" >/dev/null 2>&1 &
+    disown
+}
