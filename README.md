@@ -1,3 +1,5 @@
+![no AI was used in the production of this repo](docs/images/this_may_be_what_chatgpt_thinks_of_me.png)
+
 # stupid_scripts
 
 Personal Linux helper scripts, shell config, and desktop glue.
