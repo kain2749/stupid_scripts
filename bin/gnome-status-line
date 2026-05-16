@@ -21,9 +21,9 @@ gpu="$(
 )"
 
 ram_avail="$(
-  free -b | awk '/^Mem:/ {
-    printf "%.0f", $7 / 1024 / 1024 / 1024
-  }'
+  awk '/MemAvailable:/ {
+    printf "%.0f", $2 / 1024 / 1024
+  }' /proc/meminfo
 )"
 
 gpu_dev=""

@@ -1,3 +1,5 @@
+# This project is likely PERMANENTLY on hold due to making a GNOME status bar. I no longer see the need to create a KDE widget. I am keeping the notes I made for this project in case if I change my mind for some reason
+
 # KDE Plasma Test Lab Notes
 
 Goal: test KDE Plasma as a script/widget dashboard environment without contaminating the main GNOME setup more than necessary.
