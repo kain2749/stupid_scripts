@@ -13,6 +13,10 @@ export EDITOR=vi
 export VISUAL=vi
 #imhex flatpak bs
 imhex() {
-    flatpak run net.werwolv.ImHex "$@" >/dev/null 2>&1 &
+    if [ "$#" -eq 0 ]; then
+        flatpak run net.werwolv.ImHex >/dev/null 2>&1 &
+    else
+        flatpak run --file-forwarding net.werwolv.ImHex @@ "$(realpath "$1")" @@ >/dev/null 2>&1 &
+    fi
     disown
 }
