@@ -8,3 +8,6 @@ alias gds='git diff --staged'
 # Controller battery check
 alias batt='upower -i "$(upower -e | grep -Ei 'controller' | head -n1)"'
 alias codium='flatpak run com.vscodium.codium'
+export SYSTEMD_EDITOR=vi
+export EDITOR=vi
+export VISUAL=vi
