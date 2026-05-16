@@ -1,4 +1,4 @@
-![no AI was used in the production of this repo](docs/images/this_may_be_what_chatgpt_thinks_of_me.png)
+![no AI was used in the production of this repo](docs/images/gemini_made_this_for_me.png)
 
 # stupid_scripts
 
