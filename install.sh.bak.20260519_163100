@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -Eeuo pipefail
+set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -11,40 +11,15 @@ LOCAL_BIN="$HOME/.local/bin"
 BASH_ALIASES="$HOME/.bash_aliases"
 SYSTEMD_USER_DIR="$HOME/.config/systemd/user"
 
-ts() {
-  date +%Y%m%d_%H%M%S
-}
-
-backup_if_needed() {
-  local target="$1"
-
-  if [ -e "$target" ] && [ ! -L "$target" ]; then
-    local backup="$target.bak.$(ts)"
-    echo "[!] $target exists and is not a symlink; backing up to $backup"
-    mv "$target" "$backup"
-  fi
-}
-
-link_file() {
-  local src="$1"
-  local target="$2"
-
-  backup_if_needed "$target"
-  ln -sfn "$src" "$target"
-  echo "    linked $target -> $src"
-}
-
 echo "[*] stupid_scripts installer"
 echo "[*] repo: $REPO_DIR"
 
 mkdir -p "$LOCAL_BIN"
+mkdir -p "$SYSTEMD_USER_DIR"
 
-echo
 echo "[*] linking scripts into ~/.local/bin"
 
 if [ -d "$BIN_SRC" ]; then
-  shopt -s nullglob
-
   for f in "$BIN_SRC"/*; do
     [ -f "$f" ] || continue
 
@@ -53,29 +28,39 @@ if [ -d "$BIN_SRC" ]; then
     name="$(basename "$f")"
     target="$LOCAL_BIN/$name"
 
-    link_file "$f" "$target"
-  done
+    if [ -e "$target" ] && [ ! -L "$target" ]; then
+      backup="$target.bak.$(date +%Y%m%d_%H%M%S)"
+      echo "[!] $target exists and is not a symlink; backing up to $backup"
+      mv "$target" "$backup"
+    fi
 
-  shopt -u nullglob
+    ln -sf "$f" "$target"
+    echo "    linked $target -> $f"
+  done
 else
   echo "[!] no bin/ directory found"
 fi
 
-echo
 echo "[*] restoring ~/.bash_aliases"
 
 if [ -f "$SHELL_SRC/bash_aliases" ]; then
-  link_file "$SHELL_SRC/bash_aliases" "$BASH_ALIASES"
+  if [ -e "$BASH_ALIASES" ] && [ ! -L "$BASH_ALIASES" ]; then
+    backup="$BASH_ALIASES.bak.$(date +%Y%m%d_%H%M%S)"
+    echo "[!] ~/.bash_aliases exists and is not a symlink; backing up to $backup"
+    mv "$BASH_ALIASES" "$backup"
+  fi
+
+  ln -sf "$SHELL_SRC/bash_aliases" "$BASH_ALIASES"
+  echo "    linked $BASH_ALIASES -> $SHELL_SRC/bash_aliases"
 else
-  echo "    no shell/bash_aliases found"
+  echo "[!] no shell/bash_aliases found"
 fi
 
-echo
 echo "[*] checking ~/.local/bin PATH"
 
 case ":$PATH:" in
   *":$HOME/.local/bin:"*)
-    echo "    ~/.local/bin is already in PATH"
+    echo "    ~/.local/bin is already in current PATH"
     ;;
   *)
     echo "[!] ~/.local/bin is not in current PATH"
@@ -84,57 +69,38 @@ case ":$PATH:" in
     ;;
 esac
 
-echo
 echo "[*] linking user systemd units, if any"
 
 if [ -d "$SYSTEMD_USER_SRC" ]; then
-  mkdir -p "$SYSTEMD_USER_DIR"
-
-  shopt -s nullglob
-
   for f in "$SYSTEMD_USER_SRC"/*; do
     [ -f "$f" ] || continue
 
     name="$(basename "$f")"
     target="$SYSTEMD_USER_DIR/$name"
 
-    link_file "$f" "$target"
+    if [ -e "$target" ] && [ ! -L "$target" ]; then
+      backup="$target.bak.$(date +%Y%m%d_%H%M%S)"
+      echo "[!] $target exists and is not a symlink; backing up to $backup"
+      mv "$target" "$backup"
+    fi
+
+    ln -sf "$f" "$target"
+    echo "    linked $target -> $f"
   done
 
-  shopt -u nullglob
-
-  if command -v systemctl >/dev/null 2>&1; then
-    systemctl --user daemon-reload || true
-  fi
+  systemctl --user daemon-reload || true
 else
   echo "    no systemd-user/ directory found"
 fi
 
-echo
 echo "[*] verification"
 
-if [ -d "$BIN_SRC" ]; then
-  shopt -s nullglob
+echo "    ~/.local/bin:"
+ls -l "$LOCAL_BIN" | grep "$REPO_DIR" || true
 
-  for f in "$BIN_SRC"/*; do
-    [ -f "$f" ] || continue
-
-    name="$(basename "$f")"
-    target="$LOCAL_BIN/$name"
-
-    if [ -L "$target" ]; then
-      echo "    OK: $target -> $(readlink "$target")"
-    else
-      echo "    WARN: $target is not a symlink"
-    fi
-  done
-
-  shopt -u nullglob
-fi
-
-if [ -e "$BASH_ALIASES" ]; then
-  ls -l "$BASH_ALIASES"
-fi
+echo
+echo "    ~/.bash_aliases:"
+ls -l "$BASH_ALIASES" || true
 
 echo
 echo "[*] done"
@@ -143,4 +109,3 @@ echo "Next steps:"
 echo "  source ~/.bashrc"
 echo "  command -v toggle-audio"
 echo "  command -v gnome-status-line"
-echo "  command -v dock-favs"
