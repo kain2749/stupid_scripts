@@ -20,3 +20,8 @@ imhex() {
     fi
     disown
 }
+#adds API keys and crap to my shell so I don't have to worry about it 
+#and it stays well outside of anything that is ever going in to github
+if [ -f "$HOME/Documents/scripts/exports.sh" ]; then
+  source "$HOME/Documents/scripts/exports.sh"
+fi
