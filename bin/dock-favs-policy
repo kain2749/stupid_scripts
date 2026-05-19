@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+STATE_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/dock-lock"
+STATE_FILE="$STATE_DIR/favorite-apps"
+
+DCONF_PROFILE="/etc/dconf/profile/user"
+DCONF_DB_DIR="/etc/dconf/db/local.d"
+DCONF_LOCK_DIR="/etc/dconf/db/local.d/locks"
+DCONF_DEFAULTS="$DCONF_DB_DIR/00-favorite-apps"
+DCONF_LOCK="$DCONF_LOCK_DIR/favorite-apps"
+
+usage() {
+  cat <<USAGE
+Usage:
+  dock-favs-policy lock
+  dock-favs-policy unlock
+  dock-favs-policy remove
+  dock-favs-policy status
+
+Commands:
+  lock     Lock GNOME dock favorites using saved dock-favs snapshot
+  unlock   Remove only the dconf lock, keeping the default policy value
+  remove   Remove lock and default policy value
+  status   Show policy files if present
+
+Notes:
+  Run 'dock-favs save' first.
+  Log out and back in after lock/unlock/remove.
+USAGE
+}
+
+require_snapshot() {
+  if [ ! -f "$STATE_FILE" ]; then
+    echo "No saved dock favorites found at $STATE_FILE" >&2
+    echo "Run: dock-favs save" >&2
+    exit 1
+  fi
+}
+
+ensure_profile() {
+  sudo mkdir -p /etc/dconf/profile
+
+  if [ ! -f "$DCONF_PROFILE" ]; then
+    printf 'user-db:user\nsystem-db:local\n' | sudo tee "$DCONF_PROFILE" >/dev/null
+    return
+  fi
+
+  sudo cp "$DCONF_PROFILE" "$DCONF_PROFILE.bak.$(date +%Y%m%d_%H%M%S)"
+
+  grep -qxF 'user-db:user' "$DCONF_PROFILE" \
+    || printf 'user-db:user\n' | sudo tee -a "$DCONF_PROFILE" >/dev/null
+
+  grep -qxF 'system-db:local' "$DCONF_PROFILE" \
+    || printf 'system-db:local\n' | sudo tee -a "$DCONF_PROFILE" >/dev/null
+}
+
+case "${1:-}" in
+  lock)
+    require_snapshot
+    ensure_profile
+
+    sudo mkdir -p "$DCONF_DB_DIR" "$DCONF_LOCK_DIR"
+
+    FAVS="$(cat "$STATE_FILE")"
+
+    printf "[org/gnome/shell]\nfavorite-apps=%s\n" "$FAVS" \
+      | sudo tee "$DCONF_DEFAULTS" >/dev/null
+
+    printf '/org/gnome/shell/favorite-apps\n' \
+      | sudo tee "$DCONF_LOCK" >/dev/null
+
+    sudo dconf update
+
+    echo "Dock favorites policy locked."
+    echo "Log out and back in for GNOME to fully apply it."
+    ;;
+
+  unlock)
+    sudo rm -f "$DCONF_LOCK"
+    sudo dconf update
+
+    echo "Dock favorites lock removed."
+    echo "Default policy value still exists at $DCONF_DEFAULTS."
+    echo "Log out and back in."
+    ;;
+
+  remove)
+    sudo rm -f "$DCONF_LOCK" "$DCONF_DEFAULTS"
+    sudo dconf update
+
+    echo "Dock favorites policy removed."
+    echo "Log out and back in."
+    ;;
+
+  status)
+    echo "Snapshot:"
+    if [ -f "$STATE_FILE" ]; then
+      cat "$STATE_FILE"
+    else
+      echo "  missing: $STATE_FILE"
+    fi
+
+    echo
+    echo "dconf default:"
+    if [ -f "$DCONF_DEFAULTS" ]; then
+      sudo cat "$DCONF_DEFAULTS"
+    else
+      echo "  missing: $DCONF_DEFAULTS"
+    fi
+
+    echo
+    echo "dconf lock:"
+    if [ -f "$DCONF_LOCK" ]; then
+      sudo cat "$DCONF_LOCK"
+    else
+      echo "  missing: $DCONF_LOCK"
+    fi
+    ;;
+
+  -h|--help|help|"")
+    usage
+    ;;
+
+  *)
+    echo "Unknown command: $1" >&2
+    usage >&2
+    exit 1
+    ;;
+esac
