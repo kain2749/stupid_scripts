@@ -47,6 +47,8 @@ Then verify:
 ```bash
 command -v toggle-audio
 command -v gnome-status-line
+command -v dock-favs
+command -v dock-favs-policy
 ls -l ~/.bash_aliases
 ```
 
@@ -56,10 +58,14 @@ ls -l ~/.bash_aliases
 ```text
 stupid_scripts/
 ├── bin/
+│   ├── dock-favs
+│   ├── dock-favs-policy
 │   ├── toggle-audio
 │   └── gnome-status-line
 ├── shell/
 │   └── bash_aliases
+├── systemd-user/
+│   └── optional user systemd units
 ├── install.sh
 └── README.md
 ```
