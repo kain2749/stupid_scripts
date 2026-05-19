@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+STATE_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/dock-lock"
+STATE_FILE="$STATE_DIR/favorite-apps"
+
+usage() {
+  cat <<USAGE
+Usage:
+  dock-favs save
+  dock-favs restore
+  dock-favs show
+  dock-favs current
+
+Commands:
+  save      Save current GNOME dock favorites
+  restore   Restore saved GNOME dock favorites
+  show      Show saved dock favorites
+  current   Show current live GNOME dock favorites
+USAGE
+}
+
+case "${1:-}" in
+  save)
+    mkdir -p "$STATE_DIR"
+    gsettings get org.gnome.shell favorite-apps > "$STATE_FILE"
+    echo "Saved dock favorites to $STATE_FILE"
+    ;;
+
+  restore)
+    if [ ! -f "$STATE_FILE" ]; then
+      echo "No saved dock favorites found at $STATE_FILE" >&2
+      exit 1
+    fi
+
+    gsettings set org.gnome.shell favorite-apps "$(cat "$STATE_FILE")"
+    echo "Restored dock favorites from $STATE_FILE"
+    ;;
+
+  show)
+    if [ ! -f "$STATE_FILE" ]; then
+      echo "No saved dock favorites found at $STATE_FILE" >&2
+      exit 1
+    fi
+
+    cat "$STATE_FILE"
+    ;;
+
+  current)
+    gsettings get org.gnome.shell favorite-apps
+    ;;
+
+  -h|--help|help|"")
+    usage
+    ;;
+
+  *)
+    echo "Unknown command: $1" >&2
+    usage >&2
+    exit 1
+    ;;
+esac
