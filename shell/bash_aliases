@@ -111,3 +111,7 @@ alias cd..='cd ..'
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
+
+#also lazy
+alias py='python'
+alias p='cd ~/repos; ls -l'
