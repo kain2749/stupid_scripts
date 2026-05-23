@@ -25,3 +25,10 @@ imhex() {
 if [ -f "$HOME/Documents/scripts/exports.sh" ]; then
   source "$HOME/Documents/scripts/exports.sh"
 fi
+#make everything use btop, even when muscle memory sends me to bpytop
+# \top will override this and force top if for some reason I need the
+#OG top, which... nah.
+alias bpytop=btop
+alias bashtop=btop
+alias bt=btop
+alias top=btop
