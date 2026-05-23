@@ -1,3 +1,4 @@
+#git QoL
 alias gs='git status'
 alias ga='git add'
 alias gc='git commit -m'
@@ -5,12 +6,24 @@ alias gp='git push'
 alias gl='git log --oneline --decorate --graph -20'
 alias gd='git diff'
 alias gds='git diff --staged'
+alias gco='git checkout'
+alias gb='git branch'
+alias gba='git branch -a'
+alias gr='git remote -v'
+alias gf='git fetch --all --prune'
+alias gpl='git pull --ff-only'
+alias gundo='git reset --soft HEAD~1'
+alias amend='git commit --amend --no-edit'
+
 # Controller battery check
 alias batt='upower -i "$(upower -e | grep -Ei 'controller' | head -n1)"'
-alias codium='flatpak run com.vscodium.codium'
+
+#make everything use the super cli editor
 export SYSTEMD_EDITOR=vi
 export EDITOR=vi
 export VISUAL=vi
+
+alias codium='flatpak run com.vscodium.codium'
 #imhex flatpak bs
 imhex() {
     if [ "$#" -eq 0 ]; then
@@ -20,11 +33,13 @@ imhex() {
     fi
     disown
 }
+
 #adds API keys and crap to my shell so I don't have to worry about it 
 #and it stays well outside of anything that is ever going in to github
 if [ -f "$HOME/Documents/scripts/exports.sh" ]; then
   source "$HOME/Documents/scripts/exports.sh"
 fi
+
 #make everything use btop, even when muscle memory sends me to bpytop
 # \top will override this and force top if for some reason I need the
 #OG top, which... nah.
@@ -32,3 +47,67 @@ alias bpytop=btop
 alias bashtop=btop
 alias bt=btop
 alias top=btop
+
+# extract common archives without remembering tar flags
+extract() {
+    case "$1" in
+        *.tar.bz2) tar xjf "$1" ;;
+        *.tar.gz)  tar xzf "$1" ;;
+        *.bz2)     bunzip2 "$1" ;;
+        *.rar)     unrar x "$1" ;;
+        *.gz)      gunzip "$1" ;;
+        *.tar)     tar xf "$1" ;;
+        *.tbz2)    tar xjf "$1" ;;
+        *.tgz)     tar xzf "$1" ;;
+        *.zip)     unzip "$1" ;;
+        *.7z)      7z x "$1" ;;
+        *) echo "don't know how to extract: $1" ;;
+    esac
+}
+
+# quick backup before mangling a file
+bak() {
+    cp "$1" "$1.bak.$(date +%Y%m%d_%H%M%S)"
+}
+
+# make a dir and enter it
+mkcd() {
+    mkdir -p "$1" && cd "$1"
+}
+
+# run command with a mostly clean environment
+cleanenv() {
+    env -i HOME="$HOME" USER="$USER" LOGNAME="$LOGNAME" PATH="/usr/local/bin:/usr/bin:/bin" TERM="$TERM" "$@"
+}
+
+# clipboard, if on GNOME/Wayland
+alias clip='wl-copy'
+alias paste='wl-paste'
+
+# safer grep/find replacements
+alias grep='grep --color=auto'
+alias rg='rg --hidden --glob "!.git"'
+alias fd='fd --hidden --exclude .git'
+
+# modern ls/tree-ish
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+
+# disk/process/network sanity
+alias dfh='df -h'
+alias duh='du -h --max-depth=1'
+alias ports='ss -tulpn'
+alias myip='hostname -I'
+alias psg='ps aux | grep -i --color=auto'
+
+# journalctl/systemd user service stuff
+alias jfu='journalctl --user -fu'
+alias scu='systemctl --user'
+alias sc='systemctl'
+
+#sometimes I'm an idiot, but I'm not always punished for it.
+alias cd..='cd ..'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
