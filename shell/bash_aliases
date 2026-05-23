@@ -114,4 +114,4 @@ alias ....='cd ../../..'
 
 #also lazy
 alias py='python'
-alias p='cd ~/repos; ls -l'
+alias p='cd ~/repos && ls -lha --group-directories-first'
