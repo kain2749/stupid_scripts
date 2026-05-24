@@ -63,6 +63,7 @@ stupid_scripts/
 ├── shell/
 │   ├── bash_aliases
 │   └── do_i_have_internet.sh
+│   └── do_i_have_internet_ping.sh
 ├── install.sh
 └── README.md
 ```
