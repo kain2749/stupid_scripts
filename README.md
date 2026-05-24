@@ -202,13 +202,21 @@ alias gds='git diff --staged'
 alias batt='upower -i "$(upower -e | grep -Ei '\''controller'\'' | head -n1)"'
 ```
 
-### `shell/bash_aliases`
+### `shell/do_i_have_internet_ping.sh`
 
-I asked ChatGPT for a short script, because I was using my cellphone and wanted something I could run on my desktop. That is what it spit out. Not quite short, but close enough for government work. Either way, I was interested because it used `#!/usr/bin/env bash` instead of the older `#!/bin/bash` style I am used to seeing.
+I asked ChatGPT for a short script, because I was using my cellphone and wanted something I could run on my desktop. This was the prompt:
+
+```text
+What's a short bash script that tries to ping 8.8.8.8 until it works even if it has a failure that causes ping to quit?
+```
+
+That is what it spit out. Not quite short, but close enough for government work. Either way, I was interested because it used `#!/usr/bin/env bash` instead of the older `#!/bin/bash` style I am used to seeing.
 
 If you run `env` by itself, it prints the environment variables for your current process environment. Simple enough. If you check the man page, it describes itself as `env - run a program in a modified environment`, which is the more important part here. In a shebang, `#!/usr/bin/env bash` does not mean “use my login shell” or “look at `$SHELL`.” It means “run `/usr/bin/env`, ask it to find `bash` using `$PATH`, and then execute the script with that Bash.” That makes the script more portable across systems where Bash may live at `/bin/bash`, `/usr/bin/bash`, `/usr/local/bin/bash`, or some Homebrew-shaped nonsense.
 
 `env` was not part of 1970s UNIX in the ancient tablet sense. The old machinery was the shell, environment inheritance, `PATH`, and `exec`. `env` came later, in the portability and standardization era, around the POSIX / 4.4BSD neighborhood. So the reason I am used to seeing `#!/bin/bash` instead of `#!/usr/bin/env bash` is probably because I am old enough to have looked at a lot of old-ass scripts. That is not a technical argument. That is just archaeology with back pain.
+
+### `shell/do_i_have_internet.sh`
 
 The actual connectivity check is also worth being specific about. `ping 8.8.8.8` asks a very narrow question: can this machine send an ICMP echo request to `8.8.8.8` and receive an ICMP echo reply? That is a clean test for basic IP reachability, but it is not the same thing as asking whether “the internet works.” It does not test DNS, HTTPS, captive portals, proxies, or whether normal web traffic can get out. It only tests whether ICMP to that specific IP works from here.
 
