@@ -51,8 +51,6 @@ command -v dock-favs
 command -v dock-favs-policy
 ls -l ~/.bash_aliases
 ```
-
-
 ## Layout
 
 ```text
@@ -60,12 +58,11 @@ stupid_scripts/
 ├── bin/
 │   ├── dock-favs
 │   ├── dock-favs-policy
-│   ├── toggle-audio
-│   └── gnome-status-line
+│   ├── gnome-status-line
+│   └── toggle-audio
 ├── shell/
-│   └── bash_aliases
-├── systemd-user/
-│   └── optional user systemd units
+│   ├── bash_aliases
+│   └── do_i_have_internet.sh
 ├── install.sh
 └── README.md
 ```
@@ -203,6 +200,20 @@ alias gd='git diff'
 alias gds='git diff --staged'
 alias batt='upower -i "$(upower -e | grep -Ei '\''controller'\'' | head -n1)"'
 ```
+
+### `shell/bash_aliases`
+
+I asked ChatGPT for a short script, because I was using my cellphone and wanted something I could run on my desktop. That is what it spit out. Not quite short, but close enough for government work. Either way, I was interested because it used `#!/usr/bin/env bash` instead of the older `#!/bin/bash` style I am used to seeing.
+
+If you run `env` by itself, it prints the environment variables for your current process environment. Simple enough. If you check the man page, it describes itself as `env - run a program in a modified environment`, which is the more important part here. In a shebang, `#!/usr/bin/env bash` does not mean “use my login shell” or “look at `$SHELL`.” It means “run `/usr/bin/env`, ask it to find `bash` using `$PATH`, and then execute the script with that Bash.” That makes the script more portable across systems where Bash may live at `/bin/bash`, `/usr/bin/bash`, `/usr/local/bin/bash`, or some Homebrew-shaped nonsense.
+
+`env` was not part of 1970s UNIX in the ancient tablet sense. The old machinery was the shell, environment inheritance, `PATH`, and `exec`. `env` came later, in the portability and standardization era, around the POSIX / 4.4BSD neighborhood. So the reason I am used to seeing `#!/bin/bash` instead of `#!/usr/bin/env bash` is probably because I am old enough to have looked at a lot of old-ass scripts. That is not a technical argument. That is just archaeology with back pain.
+
+The actual connectivity check is also worth being specific about. `ping 8.8.8.8` asks a very narrow question: can this machine send an ICMP echo request to `8.8.8.8` and receive an ICMP echo reply? That is a clean test for basic IP reachability, but it is not the same thing as asking whether “the internet works.” It does not test DNS, HTTPS, captive portals, proxies, or whether normal web traffic can get out. It only tests whether ICMP to that specific IP works from here.
+
+A non-ICMP version of that same basic idea is a TCP connect probe. For example, trying to open a TCP connection to `1.1.1.1` or `8.8.8.8` on port `443` asks: can I send a TCP packet out, get packets back, and complete a handshake with a real internet host? That is often closer to what a desktop user actually means by “do I have internet,” because port `443` is normal web traffic and is less likely to be blocked than ICMP. The tradeoff is that it is no longer protocol-neutral. It proves TCP to that host and port works, not that every kind of traffic works.
+
+So the tiny stupid version can use `ping` if all I care about is basic ICMP reachability. If I want something closer to “can this box actually talk to the outside world like a normal computer,” a TCP probe to port `443` is probably the better practical test.
 
 ## Install Script
 
