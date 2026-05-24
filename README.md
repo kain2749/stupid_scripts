@@ -64,6 +64,7 @@ stupid_scripts/
 │   ├── bash_aliases
 │   └── do_i_have_internet.sh
 │   └── do_i_have_internet_ping.sh
+│   └── do_i_have_internet_osi_model.sh
 ├── install.sh
 └── README.md
 ```
@@ -223,6 +224,77 @@ The actual connectivity check is also worth being specific about. `ping 8.8.8.8`
 A non-ICMP version of that same basic idea is a TCP connect probe. For example, trying to open a TCP connection to `1.1.1.1` or `8.8.8.8` on port `443` asks: can I send a TCP packet out, get packets back, and complete a handshake with a real internet host? That is often closer to what a desktop user actually means by “do I have internet,” because port `443` is normal web traffic and is less likely to be blocked than ICMP. The tradeoff is that it is no longer protocol-neutral. It proves TCP to that host and port works, not that every kind of traffic works.
 
 So the tiny stupid version can use `ping` if all I care about is basic ICMP reachability. If I want something closer to “can this box actually talk to the outside world like a normal computer,” a TCP probe to port `443` is probably the better practical test.
+
+### `shell/do_i_have_internet_osi_model.sh`
+
+Checks whether the machine has internet in a slightly less dumb way than just yelling `ping 8.8.8.8` into the void.
+
+This started as a simple question: “did the wire get connected and can I get a packet out and back?” For that, a single ICMP ping is actually pretty good. It asks a clean, low-level question: can this box send an ICMP echo request to a known external IP and receive the echo reply?
+
+But that is not the same thing as “the internet works.” ICMP can work while DNS is broken. DNS can work while HTTPS is blocked. A TCP connection can work while a captive portal is still doing coffee shop nonsense. So this script checks a few layers and reports which one failed instead of giving one useless yes/no answer.
+
+Current checks:
+
+```text
+default route exists
+icmp packet out/back
+dns resolves name
+tcp 443 handshake works
+https request works
+```
+
+The script runs each check, prints `[ok]` or `[fail]`, then exits with `0` if everything passed or `1` if anything failed.
+
+Example:
+
+```bash
+./shell/do_i_have_internet_osi_model.sh
+```
+
+Possible output:
+
+```text
+[ok]   default route exists
+[ok]   icmp packet out/back
+[ok]   dns resolves name
+[ok]   tcp 443 handshake works
+[ok]   https request works
+internet: yuh
+```
+
+Or, if something is busted:
+
+```text
+[ok]   default route exists
+[fail] icmp packet out/back
+[ok]   dns resolves name
+[ok]   tcp 443 handshake works
+[ok]   https request works
+internet: nu
+```
+
+That does not necessarily mean the whole internet is dead. It means one of the assumptions this script cares about failed. Which is the point. A single `ping` gives you one bit of information. This gives you a small failure map.
+
+What the checks mean:
+
+```text
+ip route get 1.1.1.1
+  The kernel knows where it would send traffic for an outside IP.
+
+ping -q -n -c 1 -W 2 8.8.8.8
+  ICMP can leave the machine and come back from a known external IP.
+
+getent hosts example.com
+  Name resolution works through the system resolver path, not some random DNS-only tool.
+
+timeout 3 bash -c '</dev/tcp/1.1.1.1/443'
+  A TCP handshake to an external HTTPS port works.
+
+curl -fsS --max-time 5 https://example.com
+  HTTPS works well enough to make a normal web request.
+```
+
+This is not a perfect network diagnostic tool. It is not trying to be. It is a quick sanity check for “is my desktop online in the ways I normally care about?” If this says `internet: yuh`, basic routing, ICMP, DNS, TCP, TLS, and HTTP are all alive enough. If it says `internet: nu`, the failed line tells me where to start swearing.
 
 ## Install Script
 
