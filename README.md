@@ -62,8 +62,8 @@ stupid_scripts/
 │   └── toggle-audio
 ├── shell/
 │   ├── bash_aliases
-│   └── do_i_have_internet.sh
-│   └── do_i_have_internet_ping.sh
+│   ├── do_i_have_internet.sh
+│   ├── do_i_have_internet_ping.sh
 │   └── do_i_have_internet_osi_model.sh
 ├── install.sh
 └── README.md
@@ -137,7 +137,7 @@ Well, since now it seems like I was writing a tool to monitor all of the stuff o
 
 Anyway, that's the way too long story, below is the stuff an LLM told me to include about the code and what it does. I mean, the code was above the whole time, it's not like this was some recipe blog where I'm keeping an audience captive so you can learn to scramble the perfect egg. You read this because you decided to.
 
-## Temporary NVMe temperature display
+#### Temporary NVMe temperature display
 
 `gnome-status-line` currently includes the highest NVMe temperature sensor as `NVMe ##°`.
 
@@ -202,6 +202,8 @@ alias gd='git diff'
 alias gds='git diff --staged'
 alias batt='upower -i "$(upower -e | grep -Ei '\''controller'\'' | head -n1)"'
 ```
+
+The next three scripts are basically the same dumb question asked at different layers: “am I online yet?”
 
 ### `shell/do_i_have_internet_ping.sh`
 
