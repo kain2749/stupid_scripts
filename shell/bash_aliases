@@ -115,3 +115,4 @@ alias ....='cd ../../..'
 #also lazy
 alias py='python'
 alias p='cd ~/repos && ls -lha --group-directories-first'
+alias pyf='python -i -c "from datetime import date"'
