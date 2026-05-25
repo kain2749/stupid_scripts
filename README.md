@@ -298,6 +298,8 @@ curl -fsS --max-time 5 https://example.com
 
 This is not a perfect network diagnostic tool. It is not trying to be. It is a quick sanity check for “is my desktop online in the ways I normally care about?” If this says `internet: yuh`, basic routing, ICMP, DNS, TCP, TLS, and HTTP are all alive enough. If it says `internet: nu`, the failed line tells me where to start swearing.
 
+It has been brought to my attention that a tool called nmcli does most of this shit. Check it out: https://networkmanager.pages.freedesktop.org/NetworkManager/NetworkManager/nmcli.html
+
 ## Install Script
 
 `install.sh` recreates the local symlink structure.
