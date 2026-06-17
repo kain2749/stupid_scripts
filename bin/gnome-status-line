@@ -52,63 +52,63 @@ fi
 
 ssd_avail="$(df -h --output=avail / | awk 'NR==2 {print $1}')"
 
-controller_device="$(upower -e | grep -Ei 'controller|dualsense|sony' | head -n1)"
-
-controller="?"
-if [ -n "$controller_device" ]; then
-  controller="$(
-    upower -i "$controller_device" 2>/dev/null |
-      awk -F': *' '/percentage:/ {
-        gsub("%", "", $2)
-        print $2
-        exit
-      }'
-  )"
-fi
-
-[ -z "$controller" ] && controller="?"
-
-list_gsconnect_device_paths() {
-  gdbus call --session \
-    --dest org.gnome.Shell.Extensions.GSConnect \
-    --object-path /org/gnome/Shell/Extensions/GSConnect \
-    --method org.freedesktop.DBus.ObjectManager.GetManagedObjects 2>/dev/null |
-    grep -oE "/org/gnome/Shell/Extensions/GSConnect/Device/[A-Za-z0-9_-]+" |
-    sort -u
-}
-
-get_gsconnect_phone_battery() {
-  local device_path
-  local battery_action
-  local percent
-
-  while read -r device_path; do
-    [ -n "$device_path" ] || continue
-
-    battery_action="$(
-      gdbus call --session \
-        --dest org.gnome.Shell.Extensions.GSConnect \
-        --object-path "$device_path" \
-        --method org.gtk.Actions.Describe battery 2>/dev/null
-    )"
-
-    percent="$(
-      grep -oE "'battery[^']*', [0-9]+" <<< "$battery_action" |
-        grep -oE '[0-9]+$' |
-        head -n1
-    )"
-
-    if [ -n "$percent" ]; then
-      printf "%s" "$percent"
-      return 0
-    fi
-  done < <(list_gsconnect_device_paths)
-
-  return 1
-}
-
-phone="$(get_gsconnect_phone_battery)"
-[ -z "$phone" ] && phone="?"
+# controller_device="$(upower -e | grep -Ei 'controller|dualsense|sony' | head -n1)"
+#
+# controller="?"
+# if [ -n "$controller_device" ]; then
+#   controller="$(
+#     upower -i "$controller_device" 2>/dev/null |
+#       awk -F': *' '/percentage:/ {
+#         gsub("%", "", $2)
+#         print $2
+#         exit
+#       }'
+#   )"
+# fi
+#
+# [ -z "$controller" ] && controller="?"
+#
+# list_gsconnect_device_paths() {
+#   gdbus call --session \
+#     --dest org.gnome.Shell.Extensions.GSConnect \
+#     --object-path /org/gnome/Shell/Extensions/GSConnect \
+#     --method org.freedesktop.DBus.ObjectManager.GetManagedObjects 2>/dev/null |
+#     grep -oE "/org/gnome/Shell/Extensions/GSConnect/Device/[A-Za-z0-9_-]+" |
+#     sort -u
+# }
+#
+# get_gsconnect_phone_battery() {
+#   local device_path
+#   local battery_action
+#   local percent
+#
+#   while read -r device_path; do
+#     [ -n "$device_path" ] || continue
+#
+#     battery_action="$(
+#       gdbus call --session \
+#         --dest org.gnome.Shell.Extensions.GSConnect \
+#         --object-path "$device_path" \
+#         --method org.gtk.Actions.Describe battery 2>/dev/null
+#     )"
+#
+#     percent="$(
+#       grep -oE "'battery[^']*', [0-9]+" <<< "$battery_action" |
+#         grep -oE '[0-9]+$' |
+#         head -n1
+#     )"
+#
+#     if [ -n "$percent" ]; then
+#       printf "%s" "$percent"
+#       return 0
+#     fi
+#   done < <(list_gsconnect_device_paths)
+#
+#   return 1
+# }
+#
+# phone="$(get_gsconnect_phone_battery)"
+# [ -z "$phone" ] && phone="?"
 
 nvme_high="$(
   awk '
@@ -125,5 +125,7 @@ nvme_high="$(
   ' <<< "$sensors_out"
 )"
 
-printf "CPU %s° | RAM %sG | GPU %s° | VRAM %sG | SSD %s | NVMe %s° | 🎮%s%% | 📱%s%%\n" \
-  "${cpu:-?}" "${ram_avail:-?}" "${gpu:-?}" "${vram_avail:-?}" "${ssd_avail:-?}" "${nvme_high:-?}" "${controller:-?}" "${phone:-?}"
+printf "CPU %s° | RAM %sG | GPU %s° | VRAM %sG | SSD %s | NVMe %s°\n" \
+  "${cpu:-?}" "${ram_avail:-?}" "${gpu:-?}" "${vram_avail:-?}" "${ssd_avail:-?}" "${nvme_high:-?}"
+# printf "CPU %s° | RAM %sG | GPU %s° | VRAM %sG | SSD %s | NVMe %s° | 🎮%s%% | 📱%s%%\n" \
+#   "${cpu:-?}" "${ram_avail:-?}" "${gpu:-?}" "${vram_avail:-?}" "${ssd_avail:-?}" "${nvme_high:-?}" "${controller:-?}" "${phone:-?}"
