@@ -2,7 +2,7 @@
 
 sensors_out="$(sensors 2>/dev/null)"
 
-#getting CPU prepped off of package id... the other options are cores, so seems fair enough
+# CPU package temperature
 cpu="$(
   awk '/Package id 0:/ {
     gsub(/[+°C]/, "", $4)
@@ -11,7 +11,7 @@ cpu="$(
   }' <<< "$sensors_out"
 )"
 
-#this one, deliberately took the junction temp, that one is supposed to be the highest.
+# GPU junction temperature
 gpu="$(
   awk '/^junction:/ {
     gsub(/[+°C]/, "", $2)
@@ -20,13 +20,16 @@ gpu="$(
   }' <<< "$sensors_out"
 )"
 
+# Available system RAM in GiB
 ram_avail="$(
   awk '/MemAvailable:/ {
     printf "%.0f", $2 / 1024 / 1024
   }' /proc/meminfo
 )"
 
+# Find AMD GPU sysfs device
 gpu_dev=""
+
 for d in /sys/class/drm/card*/device; do
   [ -f "$d/vendor" ] || continue
   [ -f "$d/mem_info_vram_used" ] || continue
@@ -38,7 +41,9 @@ for d in /sys/class/drm/card*/device; do
   fi
 done
 
+# Available VRAM in GiB
 vram_avail="?"
+
 if [ -n "$gpu_dev" ]; then
   used="$(cat "$gpu_dev/mem_info_vram_used")"
   total="$(cat "$gpu_dev/mem_info_vram_total")"
@@ -50,29 +55,12 @@ if [ -n "$gpu_dev" ]; then
   )"
 fi
 
-ssd_avail="$(df -h --output=avail / | awk 'NR==2 {print $1}')"
-
-# controller_device="$(upower -e | grep -Ei 'controller|dualsense|sony' | head -n1)"
-#
-# controller="?"
-# if [ -n "$controller_device" ]; then
-#   controller="$(
-#     upower -i "$controller_device" 2>/dev/null |
-#       awk -F': *' '/percentage:/ {
-#         gsub("%", "", $2)
-#         print $2
-#         exit
-#       }'
-#   )"
-# fi
-#
-# [ -z "$controller" ] && controller="?"
-
 list_gsconnect_device_paths() {
   gdbus call --session \
     --dest org.gnome.Shell.Extensions.GSConnect \
     --object-path /org/gnome/Shell/Extensions/GSConnect \
-    --method org.freedesktop.DBus.ObjectManager.GetManagedObjects 2>/dev/null |
+    --method org.freedesktop.DBus.ObjectManager.GetManagedObjects \
+    2>/dev/null |
     grep -oE "/org/gnome/Shell/Extensions/GSConnect/Device/[A-Za-z0-9_-]+" |
     sort -u
 }
@@ -89,7 +77,8 @@ get_gsconnect_phone_battery() {
       gdbus call --session \
         --dest org.gnome.Shell.Extensions.GSConnect \
         --object-path "$device_path" \
-        --method org.gtk.Actions.Describe battery 2>/dev/null
+        --method org.gtk.Actions.Describe battery \
+        2>/dev/null
     )"
 
     percent="$(
@@ -110,22 +99,14 @@ get_gsconnect_phone_battery() {
 phone="$(get_gsconnect_phone_battery)"
 [ -z "$phone" ] && phone="?"
 
-nvme_high="$(
-  awk '
-    /^(Composite|Sensor 1|Sensor 2):/ {
-      val=$2
-      if ($1 == "Sensor") val=$3
-      gsub(/[+°C]/, "", val)
-      if (val+0 > max) max=val+0
-    }
-    END {
-      if (max > 0) printf "%.0f", max
-      else printf "?"
-    }
-  ' <<< "$sensors_out"
-)"
+# PS5 DualSense controller battery
+ps5=$(cat /sys/class/power_supply/ps-controller-battery-*/capacity 2>/dev/null)
+ps5=${ps5:-?}
 
-printf "CPU %s° | RAM %sG | GPU %s° | VRAM %sG | SSD %s | NVMe %s° | 📱%s%%\n" \
-  "${cpu:-?}" "${ram_avail:-?}" "${gpu:-?}" "${vram_avail:-?}" "${ssd_avail:-?}" "${nvme_high:-?}" "${phone:-?}"
-# printf "CPU %s° | RAM %sG | GPU %s° | VRAM %sG | SSD %s | NVMe %s° | 🎮%s%% | 📱%s%%\n" \
-#   "${cpu:-?}" "${ram_avail:-?}" "${gpu:-?}" "${vram_avail:-?}" "${ssd_avail:-?}" "${nvme_high:-?}" "${controller:-?}" "${phone:-?}"
+printf "CPU %s° | GPU %s° | VRAM %sG | RAM %sG | 📱%s%% | 🎮%s%%\n" \
+  "${cpu:-?}" \
+  "${gpu:-?}" \
+  "${vram_avail:-?}" \
+  "${ram_avail:-?}" \
+  "${phone:-?}" \
+  "${ps5:-?}"
